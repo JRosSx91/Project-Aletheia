@@ -12,10 +12,10 @@ export class Node {
   id: string;
 
   @Column({ type: 'text' })
-  titulo: string;
+  title: string;
 
   @Column({ type: 'text', nullable: true })
-  descripcion: string;
+  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
