@@ -8,7 +8,7 @@ import { Node } from './graph/entities/node.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'sqlite',
+      type: 'better-sqlite3',
       database: 'aletheia.db',
       entities: [Node, Connection],
       synchronize: true,
