@@ -18,7 +18,7 @@ export class GraphService {
    * In the future, it could accept a 'topic' to return specific graphs.
    */
   async getFullGraph() {
-    console.log('GraphService: Devolviendo entidades puras...');
+    console.log('GraphService: Returning pure entities...');
     const nodes = await this.nodeRepository.find();
     const connections = await this.connectionRepository.find({
       relations: ['fromNode', 'toNode'],
