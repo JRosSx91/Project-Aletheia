@@ -11,8 +11,6 @@ export function GraphVisualizerPage() {
 
   useEffect(() => {
     if (data && data.nodes.length > 0 && listRef.current) {
-      console.log("Datos y DOM listos. Creando ámbito y animando...");
-
       const scope = createScope({ root: listRef.current }).add(() => {
         animate(".node-item", {
           opacity: [0, 1],
@@ -36,20 +34,28 @@ export function GraphVisualizerPage() {
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Proyecto Aletheia</h1>
-      <div style={{ marginBottom: "2rem" }}>
-        <ThreeScene />
-      </div>
+    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+      {/* La Escena 3D actuará como fondo */}
+      <ThreeScene />
 
-      <h2>{t("knowledgeNodesTitle")}</h2>
-      <ul ref={listRef}>
-        {data?.nodes.map((node) => (
-          <li key={node.id} className="node-item" style={{ opacity: 0 }}>
-            {node.title}
-          </li>
-        ))}
-      </ul>
+      {/* Contenedor para la UI, superpuesto sobre el canvas */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none', // Permite hacer clic "a través" de este div
+        color: 'white',
+        padding: '2rem'
+      }}>
+        {/* Los elementos de la UI tendrán 'pointerEvents: auto' para ser clickables */}
+        <h1 style={{ pointerEvents: 'auto' }}>Proyecto Aletheia</h1>
+        <div style={{ position: 'absolute', bottom: '2rem', pointerEvents: 'auto' }}>
+          {/* Aquí irá en el futuro el menú de conversación, etc. */}
+          <button>Preguntar a Aletheia</button>
+        </div>
+      </div>
     </div>
   );
 }
