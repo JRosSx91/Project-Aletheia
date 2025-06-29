@@ -4,10 +4,11 @@ import { HolographicMaterialProps } from "../components/HolographicMaterial";
 
 declare module "@react-three/fiber" {
   interface ThreeElements {
-    sidMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
     holographicMaterial: Object3DNode<
       ShaderMaterial & HolographicMaterialProps,
       typeof ShaderMaterial
     >;
+    particleGalaxyMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
+    fractalEnergyMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
   }
 }
