@@ -1,25 +1,22 @@
-// src/components/Aletheia/ConnectionBeams.tsx - VERSIÓN FINAL Y DEFINITIVA
+// src/components/Aletheia/ConnectionBeams.tsx - SÍNTESIS FINAL Y DEFINITIVA
 
 import { useMemo } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useControls, folder } from "leva";
 import { LightningStorm } from "../../lib/three/LightningStorm.js";
+import type { RayParameters } from "../../lib/three/LightningStrike.js";
 
 export function ConnectionBeams({ radius = 1.5 }) {
-  // 2. Parámetros de la tormenta y de los rayos, expuestos a Leva
-  const stormControls = useControls("Tormenta de Rayos", {
-    Apariencia: folder({
-      roughness: { value: 0.9, min: 0, max: 1, label: "Aspereza" },
-      straightness: { value: 0.8, min: 0, max: 1, label: "Rectitud" },
-    }),
-    Frecuencia: folder({
+  // 1. TODOS los controles que perfeccionamos para el rayo individual están aquí.
+  const controls = useControls("Configuración de Rayos", {
+    Tormenta: folder({
       maxLightnings: {
-        value: 8,
+        value: 6,
         min: 1,
         max: 20,
         step: 1,
-        label: "Máx. Rayos",
+        label: "Número de Rayos",
       },
       lightningMinPeriod: {
         value: 0.1,
@@ -33,56 +30,93 @@ export function ConnectionBeams({ radius = 1.5 }) {
         max: 10,
         label: "Periodo Máx.",
       },
-    }),
-    Duracion: folder({
       lightningMinDuration: {
-        value: 0.2,
+        value: 0.5,
         min: 0.1,
         max: 5,
         label: "Duración Mín.",
       },
       lightningMaxDuration: {
-        value: 0.5,
+        value: 1.2,
         min: 0.1,
         max: 10,
         label: "Duración Máx.",
       },
     }),
+    Estetica: folder({
+      straightness: { value: 0.7, min: 0, max: 1, label: "Rectitud" },
+      roughness: { value: 0.85, min: 0, max: 1, label: "Aspereza" },
+      radius0: { value: 0.1, min: 0.01, max: 1, label: "Radio Tronco" },
+      radius1: { value: 0.1, min: 0.01, max: 1, label: "Radio Punta" },
+      radius0Factor: { value: 0.5, min: 0, max: 1, label: "Factor Radio Rama" },
+      timeScale: { value: 0.25, min: 0, max: 2, label: "Velocidad" },
+    }),
+    Estructura: folder({
+      ramification: {
+        value: 5,
+        min: 1,
+        max: 15,
+        step: 1,
+        label: "Ramificación",
+      },
+      maxSubrayRecursion: {
+        value: 4,
+        min: 1,
+        max: 7,
+        step: 1,
+        label: "Nivel Máx. Recursión",
+      },
+      recursionProbability: {
+        value: 0.8,
+        min: 0,
+        max: 1,
+        label: "Prob. Recursión",
+      },
+    }),
   });
 
-  // 3. Creamos una única instancia de la tormenta
+  // 2. Usamos useMemo para crear una única instancia de la tormenta, que se actualiza si los controles cambian.
   const storm = useMemo(() => {
+    // Creamos un objeto de parámetros para los rayos individuales que crea la tormenta
+    const lightningParams: RayParameters = {
+      ...controls,
+      minRadius: 0.1,
+      maxIterations: 7,
+      isEternal: false,
+    };
+
     return new LightningStorm({
-      ...stormControls,
-      lightningParameters: {
-        ...stormControls,
-        radius0: 0.05, // Radio del rayo en su origen
-        radius1: 0.05, // Radio del rayo en su destino
-      },
+      // Pasamos los controles de la tormenta
+      maxLightnings: controls.maxLightnings,
+      lightningMinPeriod: controls.lightningMinPeriod,
+      lightningMaxPeriod: controls.lightningMaxPeriod,
+      lightningMinDuration: controls.lightningMinDuration,
+      lightningMaxDuration: controls.lightningMaxDuration,
+
+      // Pasamos las especificaciones para cada rayo
+      lightningParameters: lightningParams,
+
+      // Material para los rayos
       lightningMaterial: new THREE.MeshBasicMaterial({
         color: 0xffffff,
         toneMapped: false,
       }),
 
-      // 4. ESTA ES LA LÓGICA CLAVE: Definimos el origen y destino de cada rayo.
-      onRayPosition: (source, dest) => {
-        // El origen es siempre la singularidad central
+      // La directiva de posicionamiento para CADA rayo que la tormenta crea
+      onRayPosition: (source: THREE.Vector3, dest: THREE.Vector3) => {
         source.set(0, 0, 0);
-
-        // El destino es un punto aleatorio en la superficie de la esfera contenedora
         dest
           .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
           .normalize()
           .multiplyScalar(radius);
       },
     });
-  }, [radius, stormControls]);
+  }, [radius, controls]);
 
-  // 5. En cada fotograma, actualizamos la tormenta
+  // En cada fotograma, actualizamos el estado de la tormenta
   useFrame((state) => {
     storm.update(state.clock.elapsedTime);
   });
 
-  // 6. Renderizamos el objeto storm directamente en la escena
   return <primitive object={storm} />;
 }

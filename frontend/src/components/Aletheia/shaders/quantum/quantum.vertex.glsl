@@ -2,8 +2,9 @@ uniform float uTime;
 uniform float uAmplitude;
 uniform float uFrequency;
 
-// Ruido Simplex 3D para la deformación
-// ... (debe pegar aquí la implementación completa de snoise(vec3)) ...
+varying vec2 vUv;
+
+// Pegue aquí una de sus implementaciones de snoise(vec3)
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 
@@ -76,28 +77,24 @@ float snoise(vec3 v){
                                 dot(p2,x2), dot(p3,x3) ) );
 }
 
-vec3 snoise3(vec3 p) {
-    return vec3(
-        snoise(p),
-        snoise(p + vec3(100.0)),
-        snoise(p - vec3(100.0))
-    );
+float fbm(vec3 p) {
+    float total = 0.0;
+    float amplitude = 1.0;
+    float frequency = uFrequency;
+    for (int i = 0; i < 5; i++) { // 5 octavas de detalle
+        total += snoise(p * frequency) * amplitude;
+        frequency *= 2.0;
+        amplitude *= 0.5;
+    }
+    return total;
 }
 
 void main() {
+    vUv = uv;
     vec3 displacedPosition = position;
-
-    // Usamos la coordenada UV.x como un 'progreso' a lo largo del rayo (de 0 a 1)
-    float progress = uv.x;
-
-    // Calculamos una fuerza de desplazamiento que es 0 en los extremos y máxima en el centro
-    float displacementStrength = sin(progress * 3.14159);
-
-    // Calculamos el desplazamiento usando ruido, que depende de la posición original y del tiempo
-    vec3 displacement = snoise3(position * uFrequency + uTime * 0.5) * uAmplitude * displacementStrength;
-
-    // Aplicamos el desplazamiento en las direcciones X y Z para que el rayo se 'retuerza'
-    displacedPosition.xz += displacement.xz;
+    
+     float noise = fbm(vec3(position.xy, uTime * 0.3));
+    displacedPosition.z += noise * uAmplitude;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(displacedPosition, 1.0);
 }

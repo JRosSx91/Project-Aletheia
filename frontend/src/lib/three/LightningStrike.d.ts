@@ -47,11 +47,9 @@ export interface LightningSubray {
 export interface RayParameters {
   sourceOffset?: Vector3;
   destOffset?: Vector3;
-
   timeScale?: number;
   roughness?: number;
   straightness?: number;
-
   up0?: Vector3;
   up1?: Vector3;
   radius0?: number;
@@ -59,7 +57,6 @@ export interface RayParameters {
   radius0Factor?: number;
   radius1Factor?: number;
   minRadius?: number;
-
   isEternal?: boolean;
   birthTime?: number;
   deathTime?: number;
@@ -67,17 +64,14 @@ export interface RayParameters {
   vanishingTimeFactor?: number;
   subrayPeriod?: number;
   subrayDutyCycle?: number;
-
   maxIterations?: number;
   isStatic?: boolean;
   ramification?: number;
   maxSubrayRecursion?: number;
   recursionProbability?: number;
   generateUVs?: boolean;
-
   randomGenerator?: RandomGenerator;
   noiseSeed?: number;
-
   onDecideSubrayCreation?: (
     segment: LightningSegment,
     lightningStrike: LightningStrike
@@ -88,13 +82,17 @@ export interface RayParameters {
     childSubray: LightningSubray,
     lightningStrike: LightningStrike
   ) => void;
+  // Propiedad que la clase añade internamente
+  maxSubrays?: number;
 }
 
 export class LightningStrike extends BufferGeometry {
+  rayParameters: RayParameters;
+  randomGenerator: RandomGenerator;
+  state: number;
   constructor(rayParameters?: RayParameters);
   copyParameters(dest?: RayParameters, source?: RayParameters): RayParameters;
 
-  // Ray states
   static readonly RAY_INITIALIZED: number;
   static readonly RAY_UNBORN: number;
   static readonly RAY_PROPAGATING: number;

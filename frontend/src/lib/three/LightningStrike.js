@@ -6,7 +6,7 @@ import {
   Uint32BufferAttribute,
   Vector3,
 } from "three";
-import { SimplexNoise } from "./SimplexNoise";
+import { SimplexNoise } from "./SimplexNoise.js";
 
 /**
  * @fileoverview LightningStrike object for creating lightning strikes and voltaic arcs.

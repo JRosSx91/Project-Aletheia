@@ -24,5 +24,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types",
+    "src/lib/three/LightningStrike.js",
+    "src/lib/three/LightningStorm.js",
+    "src/lib/three/SimplexNoise.js"
+  ]
 }

@@ -1,6 +1,3 @@
-// src/components/Aletheia/shaders/sphere/sphere.fragment.glsl
-
-// --- Uniforms ---
 uniform float uTime;
 uniform vec3 uColor;
 uniform vec3 uCoreColor;
@@ -12,7 +9,6 @@ uniform float uFbmFrequency;
 uniform float uFbmAmplitude;
 uniform int uFbmOctaves;
 
-// --- Varyings ---
 varying vec3 vPosition;
 varying vec3 vNormal;
 
@@ -50,17 +46,14 @@ float fbm(vec2 p) {
     float amplitude = uFbmAmplitude;
     float frequency = uFbmFrequency;
     
-    // Sumamos 'uFbmOctaves' capas de ruido
     for (int i = 0; i < uFbmOctaves; i++) {
         total += snoise(p * frequency) * amplitude;
-        frequency *= 2.0; // En cada octava, doblamos la frecuencia (más detalle)
-        amplitude *= 0.5; // Y reducimos a la mitad la amplitud (menos influencia)
+        frequency *= 2.0;
+        amplitude *= 0.5;
     }
     return total;
 }
 
-// --- Proyección Esférica ---
-// Convierte una posición 3D en la esfera a coordenadas 2D (UV)
 vec2 sphericalProjection(vec3 p) {
     float theta = atan(p.x, p.z);
     float phi = acos(p.y / length(p));
@@ -74,25 +67,19 @@ vec3 screen(vec3 colorA, vec3 colorB) {
 void main() {
     vec2 uv = sphericalProjection(normalize(vPosition));
 
-    // 2. Aplicamos Deformación de Dominio (Turbulencia) a las coordenadas
     float warpNoise = fbm(uv * uWarpFrequency + uTime * 0.1);
     uv += warpNoise * uWarpAmplitude;
     
-    // 3. Calculamos el ruido fractal final usando las coordenadas deformadas
     float fractalNoise = fbm(uv + uTime * 0.2);
     
-    // 4. Creamos los filamentos nítidos a partir del ruido fractal
-    // `abs()` crea filamentos tanto en las crestas como en los valles del ruido
     float tendrils = smoothstep(0.6, 0.61, fractalNoise);
     vec3 networkColor = uColor * tendrils * uStrength;
 
-    // 5. Calculamos el núcleo brillante (sin cambios)
     vec3 viewDirection = normalize(-vPosition);
     float coreGlow = dot(vNormal, viewDirection);
     coreGlow = pow(coreGlow, uCorePower);
     vec3 coreColor = uCoreColor * coreGlow;
 
-    // 6. Componemos la imagen final con el modo Screen
     vec3 finalColor = screen(networkColor, coreColor);
     float alpha = max(tendrils, coreGlow);
 

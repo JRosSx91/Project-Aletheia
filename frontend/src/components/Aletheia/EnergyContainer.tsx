@@ -1,15 +1,11 @@
-// src/components/Aletheia/EnergyContainer.tsx
-
 import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { shaderMaterial } from "@react-three/drei";
 import { useControls, folder } from "leva";
-// Asegúrese de que las rutas a los shaders sean correctas
 import vertexShader from "./shaders/sphere/fractal.vertex.glsl?raw";
 import fragmentShader from "./shaders/sphere/fractal.fragment.glsl?raw";
 
-// Este es el material que creamos en el último paso, ahora con un nombre más descriptivo
 export const FractalEnergyMaterial = shaderMaterial(
   {
     uTime: 0,
@@ -21,7 +17,7 @@ export const FractalEnergyMaterial = shaderMaterial(
     uWarpAmplitude: 0.3,
     uFbmFrequency: 3.0,
     uFbmAmplitude: 1.0,
-    uFbmOctaves: 5, // Las octavas deben ser un entero
+    uFbmOctaves: 5,
   },
   vertexShader,
   fragmentShader
@@ -65,7 +61,6 @@ export function EnergyContainer() {
 
   useFrame((state) => {
     if (materialRef.current) {
-      // ... (asignación de todos los uniforms desde `controls`) ...
       materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
       materialRef.current.uniforms.uColor.value.set(controls.color);
       materialRef.current.uniforms.uStrength.value = controls.strength;

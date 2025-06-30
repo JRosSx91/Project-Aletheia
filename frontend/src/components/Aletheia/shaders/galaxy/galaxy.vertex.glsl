@@ -50,7 +50,6 @@ float snoise(vec3 v) {
     return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
 }
 
-// --- FUNCIÓN HELPER 'snoise3' que devuelve un VEC3 ---
 vec3 snoise3(vec3 x) {
     float s  = snoise(x);
     float s1 = snoise(vec3(x.y - 19.1, x.z + 33.4, x.x + 47.2));
@@ -58,7 +57,6 @@ vec3 snoise3(vec3 x) {
     return vec3(s, s1, s2);
 }
 
-// --- La función Curl Noise que ahora usa snoise3 ---
 vec3 curlNoise(vec3 p) {
     const float e = 0.1;
     vec3 p_x0 = snoise3(p - vec3(e, 0.0, 0.0));
