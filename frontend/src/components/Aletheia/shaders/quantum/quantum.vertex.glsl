@@ -1,6 +1,8 @@
 uniform float uTime;
 uniform float uAmplitude;
 uniform float uFrequency;
+uniform float uGenesisAmplitude; // La altura actual de la ola de génesis
+uniform float uGenesisWidth; 
 
 varying vec2 vUv;
 
@@ -93,8 +95,19 @@ void main() {
     vUv = uv;
     vec3 displacedPosition = position;
     
-     float noise = fbm(vec3(position.xy, uTime * 0.3));
-    displacedPosition.z += noise * uAmplitude;
+    // 1. Deformación turbulenta base (sin cambios)
+    float turbulence = fbm(vec3(position.xy, uTime * 0.3));
+    displacedPosition.z += turbulence * uAmplitude;
+
+    // 2. Lógica de la Ola Localizada (Gaussiana)
+    float dist = distance(position.xy, vec2(0.0));
+    // Función de curva de campana. Decae exponencialmente con la distancia.
+    float waveProfile = exp(-pow(dist, 2.0) / uGenesisWidth);
+    
+    // La altura final de la ola depende de su perfil y de la amplitud animada
+    float genesisWave = waveProfile * uGenesisAmplitude;
+
+    displacedPosition.z += genesisWave;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(displacedPosition, 1.0);
 }

@@ -8,7 +8,11 @@ export function AletheiaScene() {
     <Canvas camera={{ position: [0, 0, 15], fov: 35 }}>
       <color args={["#010101"]} attach="background" />
       <QuantumField />
-      <AletheiaAvatar />
+      <group position={[0, 8, 0]}>
+        {" "}
+        {/* 👈 Elevamos el grupo 2 unidades en el eje Y */}
+        <AletheiaAvatar />
+      </group>
       <OrbitControls />
     </Canvas>
   );

@@ -16,6 +16,8 @@ export const QuantumFieldMaterial = shaderMaterial(
     uFrequency: 0.5,
     uGridScale: 50.0, // Añadimos el nuevo uniform con un valor inicial alto
     uBrightness: 0.5,
+    uGenesisAmplitude: 0.0,
+    uGenesisWidth: 2.5,
   },
   vertexShader,
   fragmentShader
@@ -24,7 +26,14 @@ export const QuantumFieldMaterial = shaderMaterial(
 export function QuantumField() {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
 
-  const { amplitude, frequency, gridScale } = useControls("Campo Cuántico", {
+  const {
+    amplitude,
+    frequency,
+    gridScale,
+    brightness,
+    genesisAmplitude,
+    genesisWidth,
+  } = useControls("Campo Cuántico", {
     Deformación: folder({
       amplitude: { value: 1.0, min: 0, max: 5, label: "Amplitud de Onda" },
       frequency: {
@@ -39,10 +48,25 @@ export function QuantumField() {
       gridScale: {
         value: 50.0,
         min: 5.0,
-        max: 200.0,
+        max: 400.0,
         label: "Escala de la Red",
       },
       brightness: { value: 0.5, min: 0.0, max: 1.0, label: "Brillo" },
+    }),
+    "Onda de Génesis": folder({
+      // Este slider ahora controla directamente la altura del pico
+      genesisAmplitude: {
+        value: 0.0,
+        min: 0.0,
+        max: 10.0,
+        label: "Amplitud del Pico",
+      },
+      genesisWidth: {
+        value: 2.5,
+        min: 0.1,
+        max: 10.0,
+        label: "Ancho del Pico",
+      },
     }),
   });
 
@@ -52,7 +76,9 @@ export function QuantumField() {
       materialRef.current.uniforms.uAmplitude.value = amplitude;
       materialRef.current.uniforms.uFrequency.value = frequency;
       materialRef.current.uniforms.uGridScale.value = gridScale; // Pasamos el nuevo valor
-      materialRef.current.uniforms.uBrightness.value = 0.5; // Puedes ajustar este valor según sea necesario
+      materialRef.current.uniforms.uBrightness.value = brightness;
+      materialRef.current.uniforms.uGenesisAmplitude.value = genesisAmplitude;
+      materialRef.current.uniforms.uGenesisWidth.value = genesisWidth;
     }
   });
 
