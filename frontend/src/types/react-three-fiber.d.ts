@@ -11,5 +11,6 @@ declare module "@react-three/fiber" {
     particleGalaxyMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
     fractalEnergyMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
     quantumFieldMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
+    metamorphosisMaterial: Object3DNode<ShaderMaterial, typeof ShaderMaterial>;
   }
 }

@@ -1,5 +1,3 @@
-// src/components/Aletheia/ConnectionBeams.tsx - SÍNTESIS FINAL Y DEFINITIVA
-
 import { useMemo } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -8,7 +6,6 @@ import { LightningStorm } from "../../lib/three/LightningStorm.js";
 import type { RayParameters } from "../../lib/three/LightningStrike.js";
 
 export function ConnectionBeams({ radius = 1.5 }) {
-  // 1. TODOS los controles que perfeccionamos para el rayo individual están aquí.
   const controls = useControls("Configuración de Rayos", {
     Tormenta: folder({
       maxLightnings: {
@@ -75,9 +72,7 @@ export function ConnectionBeams({ radius = 1.5 }) {
     }),
   });
 
-  // 2. Usamos useMemo para crear una única instancia de la tormenta, que se actualiza si los controles cambian.
   const storm = useMemo(() => {
-    // Creamos un objeto de parámetros para los rayos individuales que crea la tormenta
     const lightningParams: RayParameters = {
       ...controls,
       minRadius: 0.1,
@@ -86,23 +81,19 @@ export function ConnectionBeams({ radius = 1.5 }) {
     };
 
     return new LightningStorm({
-      // Pasamos los controles de la tormenta
       maxLightnings: controls.maxLightnings,
       lightningMinPeriod: controls.lightningMinPeriod,
       lightningMaxPeriod: controls.lightningMaxPeriod,
       lightningMinDuration: controls.lightningMinDuration,
       lightningMaxDuration: controls.lightningMaxDuration,
 
-      // Pasamos las especificaciones para cada rayo
       lightningParameters: lightningParams,
 
-      // Material para los rayos
       lightningMaterial: new THREE.MeshBasicMaterial({
         color: 0xffffff,
         toneMapped: false,
       }),
 
-      // La directiva de posicionamiento para CADA rayo que la tormenta crea
       onRayPosition: (source: THREE.Vector3, dest: THREE.Vector3) => {
         source.set(0, 0, 0);
         dest
@@ -113,7 +104,6 @@ export function ConnectionBeams({ radius = 1.5 }) {
     });
   }, [radius, controls]);
 
-  // En cada fotograma, actualizamos el estado de la tormenta
   useFrame((state) => {
     storm.update(state.clock.elapsedTime);
   });
