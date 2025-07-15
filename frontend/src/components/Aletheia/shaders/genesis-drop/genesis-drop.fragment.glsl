@@ -1,12 +1,17 @@
+// frontend/src/components/Aletheia/shaders/genesis-drop/genesis-drop.fragment.glsl - CORREGIDO
+
 uniform float uTime;
-uniform float uColorTransition;
-uniform float uTextureTransition;
-uniform sampler2D uFireAlphaMap; 
+uniform float uDisplacementAmount;
+uniform float uOpacity; 
+uniform float uDissolve; 
 
 varying vec2 vUv;
+varying float vDisplacement;
 
-#include "../../../../lygia/generative/fbm.glsl";
+// Incluimos FBM para el detalle del fuego
+#include "../../../../lygia/generative/snoise.glsl";
 
+// Patrón de rejilla para el estado cuántico
 float getQuantumPattern(vec2 uv) {
     vec2 grid_uv = uv * 25.0;
     vec2 d = fwidth(grid_uv);
@@ -17,24 +22,18 @@ float getQuantumPattern(vec2 uv) {
 }
 
 void main() {
-    float quantumPattern = getQuantumPattern(vUv);
+    float quantumPattern = getQuantumPattern(vUv + vDisplacement * 0.1);
 
-    float firePattern = fbm(vec3(vUv * 4.0, uTime * 0.5));
-    firePattern = smoothstep(0.5, 0.55, (firePattern + 1.0) * 0.5);
-
-    float finalAlpha = mix(quantumPattern, 1.0, uTextureTransition);
+    // Creamos un ruido de disolución
+    float dissolveNoise = snoise(vUv * 10.0 + uTime);
     
-    float finalPattern = mix(quantumPattern, firePattern, uTextureTransition);
+    // Si el ruido es menor que el umbral de disolución, el alfa es 0
+    float dissolveFactor = smoothstep(uDissolve - 0.1, uDissolve, dissolveNoise);
 
-    vec3 colorRojo = vec3(1.0, 0.2, 0.0);
-    vec3 colorAmarillo = vec3(1.0, 0.7, 0.2);
-    vec3 colorAzul = vec3(0.6, 0.8, 1.0);
+    vec3 quantumColor = vec3(0.5, 0.8, 1.0) * quantumPattern;
     
-    vec3 tempColor = mix(colorRojo, colorAmarillo, smoothstep(0.0, 0.7, uColorTransition));
-    vec3 finalColor = mix(tempColor, colorAzul, smoothstep(0.7, 1.0, uColorTransition));
+    // El alfa final se ve afectado por la opacidad general Y por la disolución
+    float finalAlpha = quantumPattern * uOpacity * (1.0 - dissolveFactor);
 
-    finalColor = mix(vec3(0.5, 0.8, 1.0), finalColor, uColorTransition);
-    
-    gl_FragColor = vec4(finalColor * finalPattern, finalAlpha);
+    gl_FragColor = vec4(quantumColor, finalAlpha);
 }
-

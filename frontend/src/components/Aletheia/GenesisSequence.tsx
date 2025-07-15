@@ -1,93 +1,232 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRef } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useControls } from "leva";
 import * as THREE from "three";
-import { MathUtils } from "three";
+import { useTexture } from "@react-three/drei";
+import { createTimeline } from "animejs";
+import { useControls } from "leva";
 import { QuantumField } from "./QuantumField";
 import { GenesisDrop } from "./GenesisDrop";
+import { MetamorphosisMaterial } from "./materials/MetamorphosisMaterial";
+
+const TIMELINE_DURATION = 12000;
 
 export function GenesisSequence() {
   const dropRef = useRef<THREE.Group>(null!);
-  const fieldRef = useRef<THREE.ShaderMaterial>(null!);
-  const dropMaterialRef = useRef<THREE.ShaderMaterial>(null!);
+  const pointLightRef = useRef<THREE.PointLight>(null!);
 
-  const { progress } = useControls("Secuencia de Génesis", {
-    progress: { value: 0.0, min: 0.0, max: 1.0, label: "Progreso" },
+  const alphaMap = useTexture("/textures/fire-alpha.jpg");
+
+  const metamorphosisMaterial = useMemo(
+    () =>
+      new MetamorphosisMaterial({
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    []
+  );
+
+  const fireballMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: new THREE.Color("#ff4400"),
+        emissive: new THREE.Color("#ff4400"),
+        alphaMap: alphaMap,
+        alphaTest: 0.5,
+        side: THREE.DoubleSide,
+        transparent: false,
+        toneMapped: false,
+      }),
+    [alphaMap]
+  );
+
+  // Propiedades de la animación. Las mantenemos todas para no romper la estructura.
+  const animProps = useRef({
+    displacement: 1.0,
+    rotation: 0.0,
+    quantumOpacity: 1.0,
+    fireballOpacity: 0.0,
+    fireballAlphaTest: 0.0,
+    r: 1.0,
+    g: 0.2,
+    b: 0.0,
+    emissiveIntensity: 0.0,
+    scale: 1.0,
+    genesisAmplitude: 0.0,
+    fieldTurbulence: 1.0,
+    collapseProgress: 0.0,
+    lightIntensity: 0.0,
+  }).current;
+
+  const timelineRef = useRef(createTimeline({ autoplay: false }));
+
+  // --- PANEL DE CONTROL PARA EL FIREBALL ---
+  const fireballControls = useControls("Fireball Tuning", {
+    "Activar Modo Tuning": { value: false },
+    color: {
+      value: "#ff4400",
+      label: "Color",
+      render: (get) => get("Fireball Tuning.Activar Modo Tuning"),
+    },
+    emissiveIntensity: {
+      value: 1.5,
+      min: 0.0,
+      max: 10.0,
+      label: "Intensidad Emisiva",
+      render: (get) => get("Fireball Tuning.Activar Modo Tuning"),
+    },
+    lightIntensity: {
+      value: 7.0,
+      min: 0.0,
+      max: 50.0,
+      label: "Intensidad de Luz",
+      render: (get) => get("Fireball Tuning.Activar Modo Tuning"),
+    },
+    alphaTest: {
+      value: 0.2,
+      min: 0.0,
+      max: 1.0,
+      label: "Umbral de Alpha",
+      render: (get) => get("Fireball Tuning.Activar Modo Tuning"),
+    },
+    rotationSpeed: {
+      value: 0.1,
+      min: 0.0,
+      max: 2.0,
+      label: "Velocidad Rotación",
+      render: (get) => get("Fireball Tuning.Activar Modo Tuning"),
+    },
   });
 
-  const waveRiseEnd = 0.4;
-  const detachEnd = 0.5;
-  const formationEnd = 0.6;
-  const ignitionEnd = 0.8;
-  const compressionEnd = 1.0;
+  const { progress } = useControls("Secuencia de Génesis", {
+    progress: { value: 0.0, min: 0.0, max: 1.0 },
+  });
 
-  const waveMaxAmplitude = 4.0;
-  const suspendedY = waveMaxAmplitude + 2.5;
+  // Tu línea de tiempo original, intacta.
+  useEffect(() => {
+    const tl = timelineRef.current;
+    tl.reset();
 
-  useFrame((state) => {
-    if (!fieldRef.current || !dropRef.current || !dropMaterialRef.current)
-      return;
+    tl.add(animProps, {
+      genesisAmplitude: [0, 4.0, 0],
+      duration: 2000,
+      easing: "easeOutSine",
+    })
+      .add(
+        animProps,
+        {
+          displacement: 0.0,
+          rotation: 10,
+          quantumOpacity: 0.0,
+          fireballOpacity: 1.0,
+          fireballAlphaTest: 0.7,
+          emissiveIntensity: 1.5,
+          duration: 3000,
+          easing: "easeInOutQuad",
+        },
+        "-=1000"
+      )
+      .add(animProps, {
+        rotation: 30,
+        scale: 0.5,
+        r: 1.0,
+        g: 0.8,
+        b: 0.2,
+        emissiveIntensity: 3.0,
+        duration: 1500,
+        easing: "easeInQuad",
+      })
+      .add(animProps, {
+        rotation: 50,
+        scale: 0.1,
+        r: 0.6,
+        g: 0.8,
+        b: 1.0,
+        emissiveIntensity: 4.0,
+        duration: 1500,
+        easing: "easeOutQuad",
+      })
+      .add(
+        animProps,
+        {
+          collapseProgress: 1.0,
+          fieldTurbulence: [1.0, 5.0, 1.0],
+          duration: 4000,
+          easing: "easeOutSine",
+        },
+        "-=500"
+      );
+  }, [animProps]);
 
-    const time = state.clock.getElapsedTime();
-    const drop = dropRef.current;
-    const material = dropMaterialRef.current as any;
+  const isTuningMode = fireballControls["Activar Modo Tuning"];
 
-    const waveRecedeProgress = Math.sin(
-      Math.min(1.0, progress / detachEnd) * Math.PI
-    );
-    fieldRef.current.uniforms.uGenesisAmplitude.value =
-      waveRecedeProgress * waveMaxAmplitude;
-
-    drop.visible = progress > waveRiseEnd;
-    const finalDropY =
-      progress < waveRiseEnd
-        ? waveRecedeProgress * waveMaxAmplitude + 2
-        : suspendedY;
-    drop.position.y = finalDropY;
-
-    let displacement = 1.0,
-      colorTransition = 0.0,
-      textureTransition = 0.0,
-      scale = 1.0,
-      rotation = 0.0;
-
-    if (progress > detachEnd && progress <= formationEnd) {
-      const phaseProgress = (progress - detachEnd) / (formationEnd - detachEnd);
-      displacement = MathUtils.lerp(1.0, 0.0, phaseProgress);
-      rotation = phaseProgress * 10.0;
-      colorTransition = phaseProgress;
-    } else if (progress > formationEnd && progress <= ignitionEnd) {
-      const phaseProgress =
-        (progress - formationEnd) / (ignitionEnd - formationEnd);
-      displacement = 0.0;
-      rotation = 10.0;
-      colorTransition = 1.0;
-      textureTransition = phaseProgress;
-    } else if (progress > ignitionEnd) {
-      const phaseProgress =
-        (progress - ignitionEnd) / (compressionEnd - ignitionEnd);
-      displacement = 0.0;
-      rotation = 10.0 + phaseProgress * 20.0;
-      textureTransition = 1.0;
-      scale = MathUtils.lerp(1.0, 0.1, phaseProgress);
-      material.uniforms.uColorTransition.value = 1.0;
+  useEffect(() => {
+    // Si no estamos en modo tuning, el slider de progreso controla la animación.
+    if (!isTuningMode) {
+      timelineRef.current.seek(TIMELINE_DURATION * progress);
     }
+  }, [progress, isTuningMode]);
 
-    drop.scale.set(scale, scale, scale);
-    drop.rotation.y += rotation * 0.01;
+  useFrame((state, delta) => {
+    if (!dropRef.current) return;
 
-    material.uniforms.uTime.value = time;
-    material.uniforms.uDisplacementAmount.value = displacement;
-    material.uniforms.uColorTransition.value = colorTransition;
-    material.uniforms.uTextureTransition.value = textureTransition;
+    // MODO TUNING: Control directo con Leva
+    if (fireballControls["Activar Modo Tuning"]) {
+      const drop = dropRef.current;
+      const light = pointLightRef.current;
+
+      (metamorphosisMaterial as any).visible = false;
+      (fireballMaterial as any).visible = true;
+      fireballMaterial.opacity = 1.0;
+
+      drop.rotation.y += delta * fireballControls.rotationSpeed;
+
+      fireballMaterial.color.set(fireballControls.color);
+      fireballMaterial.emissive.copy(fireballMaterial.color);
+      fireballMaterial.emissiveIntensity = fireballControls.emissiveIntensity;
+      fireballMaterial.alphaTest = fireballControls.alphaTest;
+
+      if (light) {
+        light.color.set(fireballControls.color);
+        light.intensity = fireballControls.lightIntensity;
+      }
+    } else {
+      // MODO ANIMACIÓN: Tu lógica original, intacta.
+      const drop = dropRef.current;
+      drop.position.y = animProps.genesisAmplitude + 2.5;
+      drop.scale.setScalar(animProps.scale);
+      drop.rotation.y = animProps.rotation;
+
+      metamorphosisMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
+      metamorphosisMaterial.uniforms.uDisplacementAmount.value =
+        animProps.displacement;
+      metamorphosisMaterial.uniforms.uOpacity.value = animProps.quantumOpacity;
+      (metamorphosisMaterial as any).visible = animProps.quantumOpacity > 0;
+
+      fireballMaterial.opacity = animProps.fireballOpacity;
+      fireballMaterial.alphaTest = animProps.fireballAlphaTest;
+      fireballMaterial.color.setRGB(animProps.r, animProps.g, animProps.b);
+      fireballMaterial.emissive.copy(fireballMaterial.color);
+      fireballMaterial.emissiveIntensity = animProps.emissiveIntensity;
+      (fireballMaterial as any).visible = animProps.fireballOpacity > 0;
+    }
   });
 
   return (
     <group>
-      <QuantumField ref={fieldRef} />
-      <group ref={dropRef} position={[0, 2, 0]} visible={false}>
-        <GenesisDrop ref={dropMaterialRef} />
+      <QuantumField
+        genesisAmplitude={animProps.genesisAmplitude}
+        collapseProgress={animProps.collapseProgress}
+        fieldTurbulence={animProps.fieldTurbulence}
+      />
+      <group ref={dropRef} position={[0, 2.5, 0]}>
+        <GenesisDrop
+          metamorphosisMaterial={metamorphosisMaterial}
+          fireballMaterial={fireballMaterial}
+        >
+          <pointLight ref={pointLightRef} distance={20} />
+        </GenesisDrop>
       </group>
     </group>
   );
