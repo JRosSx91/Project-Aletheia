@@ -8,10 +8,8 @@ uniform float uDissolve;
 varying vec2 vUv;
 varying float vDisplacement;
 
-// Incluimos FBM para el detalle del fuego
 #include "../../../../lygia/generative/snoise.glsl";
 
-// Patrón de rejilla para el estado cuántico
 float getQuantumPattern(vec2 uv) {
     vec2 grid_uv = uv * 25.0;
     vec2 d = fwidth(grid_uv);
@@ -24,8 +22,7 @@ float getQuantumPattern(vec2 uv) {
 void main() {
     float quantumPattern = getQuantumPattern(vUv + vDisplacement * 0.1);
 
-    // Creamos un ruido de disolución
-    float dissolveNoise = snoise(vUv * 10.0 + uTime);
+    float dissolveNoise = snoise(vUv * 2.0 + uTime);
     
     // Si el ruido es menor que el umbral de disolución, el alfa es 0
     float dissolveFactor = smoothstep(uDissolve - 0.1, uDissolve, dissolveNoise);

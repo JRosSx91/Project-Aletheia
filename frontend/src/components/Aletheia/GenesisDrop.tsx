@@ -7,17 +7,18 @@ import "./materials/MetamorphosisMaterial"; // Se importa para que el 'extend' s
 interface GenesisDropProps {
   metamorphosisMaterial: THREE.ShaderMaterial;
   fireballMaterial: THREE.MeshStandardMaterial;
+  fireballRef: React.Ref<THREE.Mesh>;
   children?: React.ReactNode;
 }
 
-export const GenesisDrop = forwardRef<THREE.Group, GenesisDropProps>(
-  ({ metamorphosisMaterial, fireballMaterial, children }, ref) => {
+export const GenesisDrop = forwardRef<THREE.Mesh, GenesisDropProps>(
+  ({ metamorphosisMaterial, fireballMaterial, fireballRef, children }, ref) => {
     return (
       <group ref={ref}>
         <mesh material={metamorphosisMaterial}>
           <sphereGeometry args={[0.4, 64, 64]} />
         </mesh>
-        <mesh material={fireballMaterial}>
+        <mesh ref={fireballRef} material={fireballMaterial} visible={false}>
           <sphereGeometry args={[0.4, 64, 64]} />
         </mesh>
         {children}
