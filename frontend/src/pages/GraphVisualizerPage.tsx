@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useGraphData } from "../hooks/useGraphData";
 import { animate, createScope, stagger } from "animejs";
-import { AletheiaScene } from "../components/Aletheia/AletheiaScene";
+import { AletheiaScene } from "../components/Aletheia_v1/AletheiaScene";
 
 export function GraphVisualizerPage() {
   const { t } = useTranslation();

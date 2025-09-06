@@ -1,20 +1,16 @@
 import "./index.css";
-import { extend } from "@react-three/fiber";
-import { HolographicMaterial } from "./materials/HolographicMaterial";
-import { ParticleGalaxyMaterial } from "./components/Aletheia/ParticlesGalaxy";
-import { FractalEnergyMaterial } from "./components/Aletheia/EnergyContainer";
-import { QuantumFieldMaterial } from "./components/Aletheia/QuantumField";
-import { MetamorphosisMaterial } from "./components/Aletheia/materials/MetamorphosisMaterial";
 import { IntroductionPage } from "./pages/IntroductionPage";
+import { LandscapeTestScene } from "./components/introduction/LandscapeTestScene";
 
-extend({
-  HolographicMaterial,
-  ParticleGalaxyMaterial,
-  FractalEnergyMaterial,
-  QuantumFieldMaterial,
-  MetamorphosisMaterial,
-});
 function App() {
+  // Add ?test=landscape to URL to see the channel changing effect
+  const urlParams = new URLSearchParams(window.location.search);
+  const testMode = urlParams.get('test');
+  
+  if (testMode === 'landscape') {
+    return <LandscapeTestScene />;
+  }
+  
   return <IntroductionPage />;
 }
 

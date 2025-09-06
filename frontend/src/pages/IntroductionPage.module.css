@@ -17,45 +17,39 @@
   width: 100vw;
   height: 100vh;
 }
-
 .textOverlay {
+  /* Mantenemos el overlay simple */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  pointer-events: none; /* Mantenemos esto para que no interfiera con el 3D */
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  pointer-events: none;
+  font-family: "Inter", sans-serif;
   color: #c4f5fc;
-  text-shadow: 0 0 5px rgba(0, 191, 255, 0.5), 0 0 10px rgba(0, 191, 255, 0.3);
-
-  /* --- ACCIONES DE CORRECCIÓN --- */
-  /* 1. Convertimos el overlay en un contenedor flex. */
-  display: flex;
-  /* 2. Le decimos que centre sus hijos horizontalmente. */
-  justify-content: center;
+  text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+  border: 2px solid red;
 }
-
 .textSection {
+  /* Posicionamiento absoluto relativo al contenedor de scroll */
   position: absolute;
-  width: 100%;
+  /* El centrado que SÍ funciona porque es matemático y no depende del layout del padre */
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Estilos de texto */
+  width: 90%; /* Ancho relativo para responsiveness */
   max-width: 600px;
-  padding: 2rem;
+  padding: 0 1rem;
+  margin: 0;
   text-align: center;
-
-  /* --- ACCIÓN DE CORRECCIÓN --- */
-  /* 3. Eliminamos el translateX que ya no es necesario gracias a flexbox. */
-  /* transform: translateX(-50%); Ya no es necesario */
-  left: unset; /* Reseteamos la propiedad left */
-
-  /* El 'top' se sigue definiendo inline para el posicionamiento vertical del scroll */
+  font-family: "Inter", sans-serif;
+  color: #c4f5fc;
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.6);
 }
 
+/* Podemos tener estilos específicos si queremos */
 .textSection h1 {
   font-size: 2.5rem;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-  color: #ffffff;
 }
 
 .textSection h2 {
